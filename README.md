@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Assets/LOGO.png" alt="Plan Cub AI logo" width="300">
+</p>
+
 # Plan Cub AI — a 3x3 puzzle cube coach for Spectacles
 
 An AR lens for [Snap Spectacles (2024)](https://www.spectacles.com/) where a
