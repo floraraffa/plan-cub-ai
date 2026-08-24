@@ -1,0 +1,16 @@
+- !<AssetImportMetadata/2692c507-d144-4c76-a255-70589f972a91>
+  ImportedAssetIds:
+    AsrModule: !<reference> 6fb01561-1282-4338-aac9-c49f8964756a
+  ImporterName: AsrModuleImporter
+  PrimaryAsset: !<reference> 6fb01561-1282-4338-aac9-c49f8964756a
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    {}
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000

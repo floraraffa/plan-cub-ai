@@ -1,0 +1,197 @@
+- !<AssetImportMetadata/720fba94-3161-44da-9d55-69d472d5e8db>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 8d80f8e5-d557-4c98-96b3-837af93652a1
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 8d80f8e5-d557-4c98-96b3-837af93652a1
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 31aef86d-3008-4d00-811f-f6651361886c
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/31aef86d-3008-4d00-811f-f6651361886c>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 13760568-0372-4b9d-96f7-f3097d08ecd6
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    asrModule: false
+    btnDailyEnglish: false
+    btnDailyFrench: false
+    btnDailySpanish: false
+    btnHintTexture: false
+    btnRedoTexture: false
+    btnScrambleEnglish: false
+    btnScrambleFrench: false
+    btnScrambleSpanish: false
+    btnSolveEnglish: false
+    btnSolveFrench: false
+    btnSolveSpanish: false
+    btnTeachEnglish: false
+    btnTeachFrench: false
+    btnTeachSpanish: false
+    btnUndoTexture: false
+    buttonImageSize: false
+    charHappy: false
+    charIdea: false
+    charMouthClosed: false
+    charMouthOpen: false
+    charSize: false
+    charThinking: false
+    charWaiting: false
+    charWrong: false
+    clipsEnglish: false
+    clipsFrench: false
+    clipsSpanish: false
+    coachFont: false
+    coachFontBold: false
+    cube: false
+    followDistance: false
+    followSpeed: false
+    handleMesh: false
+    handleTexture: false
+    idleNudgeSeconds: false
+    langImageEnglish: false
+    langImageFrench: false
+    langImageSize: false
+    langImageSpanish: false
+    langSpacing: false
+    logoTexture: false
+    musicTrack: false
+    musicVolume: false
+    openAiVoice: false
+    soundRight: false
+    soundWrong: false
+    statsContainerTexture: false
+    ttsModule: false
+    undoRedoSize: false
+    useOpenAITts: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - cube: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      asrModule: !<reference.AsrModule> 00000000-0000-0000-0000-000000000000
+      ttsModule: !<reference.TextToSpeechModule> 00000000-0000-0000-0000-000000000000
+      logoTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      langImageEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      langImageSpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      langImageFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      langImageSize: !<float> 11.000000
+      btnScrambleEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnScrambleSpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnScrambleFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnTeachEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnTeachSpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnTeachFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnDailyEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnDailySpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnDailyFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      buttonImageSize: !<float> 14.000000
+      btnUndoTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnRedoTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      undoRedoSize: !<float> 7.000000
+      btnHintTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnSolveEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnSolveSpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnSolveFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      handleTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      handleMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      langSpacing: !<float> 6.000000
+      clipsEnglish: !<reference.AudioTrackAsset[]>
+        []
+      clipsSpanish: !<reference.AudioTrackAsset[]>
+        []
+      clipsFrench: !<reference.AudioTrackAsset[]>
+        []
+      followDistance: !<float> 55.000000
+      followSpeed: !<float> 3.000000
+      useOpenAITts: true
+      openAiVoice: nova
+      idleNudgeSeconds: !<float> 15.000000
+      soundRight: !<reference.AudioTrackAsset> 00000000-0000-0000-0000-000000000000
+      soundWrong: !<reference.AudioTrackAsset> 00000000-0000-0000-0000-000000000000
+      musicTrack: !<reference.AudioTrackAsset> 00000000-0000-0000-0000-000000000000
+      musicVolume: 0.300000
+      coachFont: !<reference.Font> 00000000-0000-0000-0000-000000000000
+      coachFontBold: !<reference.Font> 00000000-0000-0000-0000-000000000000
+      statsContainerTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      charMouthOpen: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      charMouthClosed: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      charHappy: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      charWrong: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      charThinking: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      charWaiting: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      charIdea: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      charSize: !<float> 15.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input AssignableType cube
+    - // @input Asset.AsrModule asrModule
+    - // @input Asset.TextToSpeechModule ttsModule
+    - // @input Asset.Texture logoTexture
+    - // @input Asset.Texture langImageEnglish
+    - // @input Asset.Texture langImageSpanish
+    - // @input Asset.Texture langImageFrench
+    - // @input float langImageSize = 11
+    - // @input Asset.Texture btnScrambleEnglish
+    - // @input Asset.Texture btnScrambleSpanish
+    - // @input Asset.Texture btnScrambleFrench
+    - // @input Asset.Texture btnTeachEnglish
+    - // @input Asset.Texture btnTeachSpanish
+    - // @input Asset.Texture btnTeachFrench
+    - // @input Asset.Texture btnDailyEnglish
+    - // @input Asset.Texture btnDailySpanish
+    - // @input Asset.Texture btnDailyFrench
+    - // @input float buttonImageSize = 14
+    - // @input Asset.Texture btnUndoTexture
+    - // @input Asset.Texture btnRedoTexture
+    - // @input float undoRedoSize = 7
+    - // @input Asset.Texture btnHintTexture
+    - // @input Asset.Texture btnSolveEnglish
+    - // @input Asset.Texture btnSolveSpanish
+    - // @input Asset.Texture btnSolveFrench
+    - // @input Asset.Texture handleTexture
+    - // @input Asset.RenderMesh handleMesh
+    - // @input float langSpacing = 11.5
+    - "// @input Asset.AudioTrackAsset[] clipsEnglish"
+    - "// @input Asset.AudioTrackAsset[] clipsSpanish"
+    - "// @input Asset.AudioTrackAsset[] clipsFrench"
+    - // @input float followDistance = 70
+    - // @input float followSpeed = 3
+    - // @input bool useOpenAITts = true
+    - '// @input string openAiVoice = "nova"'
+    - // @input float idleNudgeSeconds = 8
+    - // @input Asset.AudioTrackAsset soundRight
+    - // @input Asset.AudioTrackAsset soundWrong
+    - // @input Asset.AudioTrackAsset musicTrack
+    - // @input float musicVolume = 0.3
+    - // @input Asset.Font coachFont
+    - // @input Asset.Font coachFontBold
+    - // @input Asset.Texture statsContainerTexture
+    - // @input Asset.Texture charMouthOpen
+    - // @input Asset.Texture charMouthClosed
+    - // @input Asset.Texture charHappy
+    - // @input Asset.Texture charWrong
+    - // @input Asset.Texture charThinking
+    - // @input Asset.Texture charWaiting
+    - // @input Asset.Texture charIdea
+    - // @input float charSize = 15

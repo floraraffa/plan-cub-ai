@@ -1,0 +1,65 @@
+- !<AssetImportMetadata/6ffb56b3-c33e-4470-8f47-28e9cb6fd9bd>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 102b2cea-2396-44b5-8d96-5db5c464eaec
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 102b2cea-2396-44b5-8d96-5db5c464eaec
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 5d29e381-7a73-4354-9a8d-09d38aa4e746
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/5d29e381-7a73-4354-9a8d-09d38aa4e746>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 00ffefb6-13bb-47b3-aebb-1d15e87fea33
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    arrowSize: false
+    arrowTexture: false
+    autoDemo: false
+    baseMaterial: false
+    boxMesh: false
+    cubieSize: false
+    dragThreshold: false
+    gap: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - boxMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      baseMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      cubieSize: !<float> 4.000000
+      gap: 0.250000
+      dragThreshold: !<float> 2.000000
+      autoDemo: false
+      arrowTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      arrowSize: !<float> 9.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Asset.RenderMesh boxMesh
+    - // @input Asset.Material baseMaterial
+    - // @input float cubieSize = 4
+    - // @input float gap = 0.25
+    - // @input float dragThreshold = 2
+    - // @input bool autoDemo
+    - // @input Asset.Texture arrowTexture
+    - // @input float arrowSize = 9

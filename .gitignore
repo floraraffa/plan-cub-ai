@@ -1,0 +1,5 @@
+Cache/
+Workspaces/
+PluginsUserPreferences/
+*.lock
+.DS_Store
