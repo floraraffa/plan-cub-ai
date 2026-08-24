@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Assets/LOGO.png" alt="Plan Cub AI logo" width="300">
+  <img src="Assets/LOGO.png" alt="Plan Cub AI logo" width="600">
 </p>
 
 # Plan Cub AI — a 3x3 puzzle cube coach for Spectacles
