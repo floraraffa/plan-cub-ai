@@ -53,5 +53,5 @@ cube** — it never just solves it for you (unless you ask it to).
 | `CoachStrings.ts` | The full trilingual script (EN/ES/FR), frozen so voice clips can be pre-recorded. |
 
 Built with [Claude Code](https://claude.com/claude-code) as pair programmer, by
-Flor Raffa. The teaching philosophy comes from solving the cube without ever
+Florencia Raffa. The teaching philosophy comes from solving the cube without ever
 looking up a solution — the lens teaches you to see the cube, not to memorize it.
