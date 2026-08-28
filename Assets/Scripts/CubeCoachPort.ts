@@ -580,26 +580,90 @@ export class CubeCoachPort extends BaseScriptComponent {
     return true
   }
 
+  // PERF-CRITICAL scoring: runs at every search leaf on device. Uses an index
+  // profile cached on the state (piece identities never change during in-place
+  // search) and a flat 27-cell center array — no string keys, no allocations.
+  private vProfile(state: any[]): any {
+    let prof = (state as any).__prof
+    if (prof) return prof
+    const hasL = (c: any, l: string) => {
+      for (const s of c.stickers) if (s.letter === l) return true
+      return false
+    }
+    const targets: number[][] = [[], [], [], [], []]
+    const centers: number[] = []
+    for (let i = 0; i < state.length; i++) {
+      const c = state[i]
+      const n = c.stickers.length
+      if (n === 1) centers.push(i)
+      if (n === 2 && hasL(c, "U")) targets[0].push(i)
+      if (n === 3 && hasL(c, "U")) targets[1].push(i)
+      if (n === 2 && !hasL(c, "U") && !hasL(c, "D")) targets[2].push(i)
+      if (n === 2 && hasL(c, "D")) targets[3].push(i)
+      if (n >= 2 && hasL(c, "D")) targets[4].push(i)
+    }
+    prof = {targets: targets, centers: centers, centerArr: new Array(27)}
+    ;(state as any).__prof = prof
+    return prof
+  }
+
+  // Flat cell->letter array for the six centers (they always occupy exactly
+  // the six face cells, so the array is fully overwritten each time).
+  private vCells(state: any[], prof: any): any[] {
+    const arr = prof.centerArr
+    for (const i of prof.centers) {
+      const p = state[i].pos
+      arr[(p[0] + 1) * 9 + (p[1] + 1) * 3 + (p[2] + 1)] = state[i].stickers[0].letter
+    }
+    return arr
+  }
+
+  private vPlacedIdx(arr: any[], c: any): boolean {
+    for (const s of c.stickers) {
+      const d = s.dir
+      if (arr[(d[0] + 1) * 9 + (d[1] + 1) * 3 + (d[2] + 1)] !== s.letter) return false
+    }
+    return true
+  }
+
   private vScoreFast(state: any[], stageIdx: number): number {
-    const map = this.vCenterMap(state)
+    const prof = this.vProfile(state)
+    const arr = this.vCells(state, prof)
+    let yellowIdx = -1
+    for (const i of prof.centers) if (state[i].stickers[0].letter === "D") yellowIdx = i
+    const yd = yellowIdx >= 0 ? state[yellowIdx].pos : null
+    const allPlaced = (idxs: number[]) => {
+      for (const i of idxs) if (!this.vPlacedIdx(arr, state[i])) return false
+      return true
+    }
+    const yellowCross = () => {
+      if (!yd) return false
+      for (const i of prof.targets[3]) {
+        let s: any = null
+        for (const st of state[i].stickers) if (st.letter === "D") s = st
+        if (s.dir[0] !== yd[0] || s.dir[1] !== yd[1] || s.dir[2] !== yd[2]) return false
+      }
+      return true
+    }
+    // single pass up the stage chain (every stage requires the previous ones)
     let score = 0
+    let chain = true
     for (let i = 0; i < stageIdx; i++) {
-      if (this.vStageDoneFast(state, map, i)) score += 100
+      if (chain) chain = i < 3 ? allPlaced(prof.targets[i]) : yellowCross()
+      if (chain) score += 100
     }
     if (stageIdx === 3) {
-      // yellow cross: count edges whose yellow sticker FACES the yellow center
-      let yellowKey: string | null = null
-      for (const k in map) if (map[k] === "D") yellowKey = k
-      if (yellowKey) {
-        for (const c of this.vTargets(state, "yellowEdges")) {
-          const s = c.stickers.filter((st: any) => st.letter === "D")[0]
-          if ((s.dir[0] + "," + s.dir[1] + "," + s.dir[2]) === yellowKey) score++
+      // yellow cross stage: progress = edges whose yellow sticker faces yellow
+      if (yd) {
+        for (const i of prof.targets[3]) {
+          let s: any = null
+          for (const st of state[i].stickers) if (st.letter === "D") s = st
+          if (s.dir[0] === yd[0] && s.dir[1] === yd[1] && s.dir[2] === yd[2]) score++
         }
       }
       return score
     }
-    const kind = CubeCoachPort.STAGE_KINDS[stageIdx]
-    score += this.vTargets(state, kind).filter((c) => this.vPlacedFast(map, c)).length
+    for (const i of prof.targets[stageIdx]) if (this.vPlacedIdx(arr, state[i])) score++
     return score
   }
 

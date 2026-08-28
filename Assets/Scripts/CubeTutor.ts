@@ -1328,13 +1328,19 @@ export class CubeTutor extends BaseScriptComponent {
 
   // "Help to solve": ONE tap = the coach completes the WHOLE current stage,
   // move by move, narrating the first move and the reasoning while you watch.
+  private solveStartedAt: number = -10
+
   private solveStep() {
     if (!this.lessonActive) return
     if (this.solvingStage) {
-      // tapping again while the coach works = "I'll take it from here"
+      // tapping again while the coach works = "I'll take it from here" — but a
+      // tap right after starting is almost always an accidental double (device
+      // lag makes people tap twice), so ignore it instead of cancelling
+      if (this.now - this.solveStartedAt < 1.2) return
       this.solvingStage = false
       return
     }
+    this.solveStartedAt = this.now
     const idx = this.stageIndex
     this.setExpression(this.charIdea ? this.charIdea : this.charThinking, 4)
     this.cube.focusNext(this.stages[idx].kind)
