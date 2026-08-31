@@ -40,8 +40,7 @@ cube** — it never just solves it for you (unless you ask it to).
 
 1. Open `EXP1-SPECTACLES-NATIVO.esproj` in Lens Studio 5.15.
 2. For the coach's voice: get a [Remote Service Gateway](https://developers.snap.com/spectacles/about-spectacles-features/apis/remote-service-gateway)
-   token and paste it into the `RemoteServiceGatewayCredentials` component
-   (tokens are intentionally blank in this repo — never commit yours).
+   token and paste it into the `RemoteServiceGatewayCredentials` component.
 3. Press play, pick a language, and follow the coach.
 
 ## Code tour (`Assets/Scripts/`)
