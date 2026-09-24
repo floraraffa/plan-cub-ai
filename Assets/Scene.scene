@@ -7,6 +7,7 @@
     - !<own> b3e5d28e-95b1-4e40-b7a4-8348f26edfea
     - !<own> 06381fac-b325-46af-88b1-53fda15109e7
     - !<own> 1ee9fa78-db12-4522-9205-2354736aeb6d
+    - !<own> 44fe0e68-e424-4154-b9d0-25aeedb5c15f
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       []
@@ -5973,9 +5974,9 @@
     {}
   ScriptInputs:
     "":
-      openAIToken: ""
-      googleToken: ""
-      snapToken: ""
+      openAIToken: d3e81de4-3683-40cc-808d-650e5021a4d6
+      googleToken: fb3082be-2d8b-40c0-a013-f4d284da484a
+      snapToken: 6b91651c-42ea-427c-aad8-fe5da6d56316
       enableLogging: false
       enableLoggingLifecycle: false
   ScriptTypes:
@@ -7069,6 +7070,21 @@
     []
   Components:
     - !<own> 55be292f-0363-41f1-b55c-70fcb8e4dd25
+- !<SceneObject/44fe0e68-e424-4154-b9d0-25aeedb5c15f>
+  PrefabRemaps:
+    []
+  Name: Scanner
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 87b9a16a-b71e-492c-b8ca-56572ba59d43
 - !<ScriptComponent/45520e48-33f9-45a5-b01d-48245c9be6a6>
   PrefabRemaps:
     []
@@ -14134,6 +14150,44 @@
     - !<own> 142d82e8-0b31-4ba5-bd6f-e1d5a4ffd060
   Components:
     []
+- !<ScriptComponent/87b9a16a-b71e-492c-b8ca-56572ba59d43>
+  PrefabRemaps:
+    []
+  Name: CubeScanner
+  Enabled: true
+  ScriptAsset: !<reference> 89222246-48bc-4ff8-bcc6-31d684305f50
+  ScriptInputsDefault:
+    scanButtonSize: true
+    previewSize: true
+    labelFont: true
+    handleTexture: true
+    handleMesh: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      cubeObject: !<reference.SceneObject> 06381fac-b325-46af-88b1-53fda15109e7
+      tutorObject: !<reference.SceneObject> 06381fac-b325-46af-88b1-53fda15109e7
+      btnScanEnglish: !<reference.Texture> 4e54b02f-a926-4038-8203-717d56b67163
+      btnScanSpanish: !<reference.Texture> cf973870-84ed-452c-8efb-c69ff1134fa8
+      btnScanFrench: !<reference.Texture> b43e279e-b51c-46f2-93eb-d899e676c361
+      btnCaptureEnglish: !<reference.Texture> becf1185-f75c-43cc-97b8-9e3c6ba99246
+      btnCaptureSpanish: !<reference.Texture> 7de13731-c119-4c98-9aa9-6bcfe68789cc
+      btnCaptureFrench: !<reference.Texture> 94be6d30-c656-444e-88b7-0db7f22d28e3
+      btnConfirmEnglish: !<reference.Texture> 3778cf40-86f5-4fa6-887c-4566c17cbb3c
+      btnConfirmSpanish: !<reference.Texture> f8e5fe8e-e211-4a8b-9e86-87bf6abd16a9
+      btnConfirmFrench: !<reference.Texture> 2b50518c-c924-430c-8c40-d1be4fb8cb2b
+      btnCancelEnglish: !<reference.Texture> eba872d6-cace-4db6-b105-ec1d45864d41
+      btnCancelSpanish: !<reference.Texture> e98a2e21-fb93-4487-aef0-a987538c409f
+      btnCancelFrench: !<reference.Texture> daa5aa83-9838-4a8e-96e2-cec791fc6512
+      scanButtonSize: !<float> 14.000000
+      previewSize: !<float> 18.000000
+      labelFont: !<reference.Font> 00000000-0000-0000-0000-000000000000
+      handleTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      handleMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    "":
+      {}
 - !<ScriptComponent/87e328d5-736e-4070-8bb5-9047018b52f2>
   PrefabRemaps:
     []

@@ -519,7 +519,7 @@ export class CubeTutor extends BaseScriptComponent {
     const firstPick = this.mainButtonObjs.length === 0
     if (l === this.lang && !firstPick) return
     this.lang = l
-    this.speechQueue = [] // drop queued lines from the previous language
+    this.interruptSpeech() // the user acted: cut cleanly, greet in the new language
     this.defineStages() // rebuild texts in the chosen language
     this.createButtons() // create (first pick) or swap button images/labels
     this.refreshSolveButton() // Solve artwork follows the language too
@@ -566,6 +566,18 @@ export class CubeTutor extends BaseScriptComponent {
   private handleInteractor: any = null
   private lastHandlePos: vec3 | null = null
   private handleLostT: number = 0 // seconds without hand data mid-drag
+  private followFrozen: boolean = false
+
+  // Scan mode pins the stage: no head-follow at all — only the grey bars move
+  // things. On unfreeze the CURRENT placement becomes the new home (no jump).
+  setFollowFrozen(on: boolean) {
+    this.followFrozen = on
+    this.chasing = false
+    if (!on && this.camTransform && this.rig) {
+      this.recalibrateFrom(this.camTransform.getWorldPosition(),
+        this.rig.getTransform().getWorldPosition())
+    }
+  }
 
   private updateFollow(dt: number) {
     if (!this.rig || !this.camTransform) return
@@ -591,6 +603,8 @@ export class CubeTutor extends BaseScriptComponent {
       this.chasing = false
       return
     }
+
+    if (this.followFrozen) return // pinned: the grey bar is the only mover
 
     if (!this.followCalibrated) {
       this.followCalibrated = true
@@ -766,11 +780,14 @@ export class CubeTutor extends BaseScriptComponent {
   }
 
   private startDaily() {
+    this.interruptSpeech()
+    this.abortScanIfRunning()
     const store = global.persistentStorageSystem.store
     if (store.getString("lastDailyDay") === this.todayString()) {
       this.speak("dailyAlready", {streak: "" + Math.round(store.getFloat("dailyStreak"))})
       return
     }
+    this.leaveScanState() // daily always mixes a NORMAL cube, never a scan
     this.pendingLesson = false
     this.lessonActive = false
     this.sessionActive = false
@@ -790,6 +807,9 @@ export class CubeTutor extends BaseScriptComponent {
   // --- Cube IQ challenge ------------------------------------------------------
 
   private startChallenge() {
+    this.interruptSpeech()
+    this.abortScanIfRunning()
+    this.leaveScanState() // scramble & play always starts from a normal cube
     this.pendingLesson = false
     this.lessonActive = false
     this.sessionActive = false
@@ -964,8 +984,46 @@ export class CubeTutor extends BaseScriptComponent {
 
   // --- hooks for the (experimental) real-cube scanner --------------------------
 
+  // While true, the cube holds a REAL cube's scanned state: it belongs to the
+  // scan lesson only. Any other mode starts from a fresh, solved cube.
+  private fromScan: boolean = false
+
+  // The scanner registers its cancel here: any mode button pressed MID-SCAN
+  // aborts the scan first (colors back, tiles gone, window closed).
+  private scanAbort: (() => void) | null = null
+  setScanAbortHook(cb: () => void) { this.scanAbort = cb }
+  private abortScanIfRunning() {
+    if (this.scanAbort) this.scanAbort()
+  }
+
+  private leaveScanState() {
+    if (this.fromScan) {
+      this.fromScan = false
+      this.cube.resetToSolved()
+    }
+  }
+
+  // The scanner is taking over: silence EVERY mode so nothing judges moves or
+  // announces stages while the cube is being reset, dimmed and painted.
+  // (Scanning during a lesson made the coach cry "white cross done!")
+  enterScanMode() {
+    this.interruptSpeech()
+    this.lessonActive = false
+    this.pendingLesson = false
+    this.sessionActive = false
+    this.sessionPending = false
+    this.solvingStage = false
+    this.dailyActive = false
+    if (this.hintButton) this.hintButton.enabled = false
+    if (this.solveButton) this.solveButton.enabled = false
+    if (this.statsText) this.statsText.text = ""
+    this.cube.setHighlight("none")
+    this.cube.hideMoveArrow()
+  }
+
   // The scanner applied a real cube's state: start teaching right where it is.
   startLessonFromScan() {
+    this.fromScan = true
     this.pendingLesson = false
     this.sessionActive = false
     this.sessionPending = false
@@ -979,10 +1037,14 @@ export class CubeTutor extends BaseScriptComponent {
 
   getRig(): SceneObject | null { return this.rig }
 
+  getCameraPos(): vec3 | null {
+    return this.camTransform ? this.camTransform.getWorldPosition() : null
+  }
+
   isLanguageChosen(): boolean { return this.mainButtonObjs.length > 0 }
 
   // The coach says (and shows) a line that has no pre-recorded clip.
-  coachSay(line: string, key: string) { this.speakText(line, key) }
+  coachSay(line: string, key: string, onStart?: () => void) { this.speakText(line, key, onStart) }
 
   // The scanner joins the main row: shift the three buttons left and hand
   // back the fourth slot. Sticky across language re-creations of the row.
@@ -996,6 +1058,15 @@ export class CubeTutor extends BaseScriptComponent {
   }
 
   private teachMe() {
+    this.interruptSpeech()
+    this.abortScanIfRunning()
+    if (this.fromScan && !this.cube.isSolved()) {
+      // a scanned REAL cube is loaded: Learn continues teaching THAT cube —
+      // wiping the scan and mixing here was infuriating
+      this.startLessonFromScan()
+      return
+    }
+    this.leaveScanState() // otherwise learning restarts on a normal cube
     this.lessonActive = false
     this.sessionActive = false
     this.sessionPending = false
@@ -1075,25 +1146,56 @@ export class CubeTutor extends BaseScriptComponent {
   }
 
   private ttsCache: {[key: string]: AudioTrackAsset} = {}
-  private speechQueue: {line: string, key: string | null}[] = []
+  // onStart fires when the line actually BEGINS speaking (is dequeued), so a
+  // caller can sync other surfaces (the scan window text, the demo cube's turn)
+  // to the voice instead of racing ahead of it.
+  private speechQueue: {line: string, key: string | null, onStart?: () => void}[] = []
   private ttsFetching: boolean = false
 
   // Lines are queued: each one waits for the previous audio to FINISH, so the
   // coach never interrupts itself mid-sentence.
-  private speakText(line: string, clipKey: string | null) {
+  private speakText(line: string, clipKey: string | null, onStart?: () => void) {
     print("Coach: " + line.split("**").join(""))
-    if (this.speechQueue.length >= 4) this.speechQueue.shift() // drop the oldest
-    this.speechQueue.push({line: line, key: clipKey})
+    if (this.speechQueue.length >= 6) this.speechQueue.shift() // drop the oldest
+    this.speechQueue.push({line: line, key: clipKey, onStart: onStart})
+  }
+
+  private lastAudioAt: number = -10 // when audio was last heard playing
+  private textHoldUntil: number = 0 // minimum on-screen time for the shown line
+  private speechGen: number = 0 // bumped on interrupt: stale TTS results are dropped
+
+  // A USER action (mode button, scan) cuts the coach mid-sentence. Nothing
+  // else may — lines otherwise always play (and stay readable) to the end.
+  interruptSpeech() {
+    this.speechQueue = []
+    this.speechGen++
+    this.ttsFetching = false
+    this.textHoldUntil = 0
+    if (this.audio && this.audio.isPlaying()) {
+      try { this.audio.stop(false) } catch (e) {}
+    }
   }
 
   // Called every frame: plays the next queued line once the audio is free.
   private processSpeech() {
     if (this.speechQueue.length === 0 || this.ttsFetching) return
-    if (this.audio && this.audio.isPlaying()) return
+    if (this.audio && this.audio.isPlaying()) {
+      this.lastAudioAt = this.now
+      return
+    }
+    // a small breath after each line, so the coach never sounds rushed
+    if (this.now - this.lastAudioAt < 0.45) return
+    // and a line WITHOUT audio (offline voice) still stays up long enough
+    // to be READ before the next one replaces it
+    if (this.now < this.textHoldUntil) return
 
     const item = this.speechQueue.shift()!
+    // this line is now the one being spoken: let the caller sync the scan
+    // window text and the cube's turn to THIS moment (not seconds early)
+    if (item.onStart) { try { item.onStart() } catch (e) {} }
     this.showRichText(item.line)
     item.line = item.line.split("**").join("") // voice reads it plain
+    this.textHoldUntil = this.now + Math.min(7, 1.6 + item.line.length * 0.055)
 
     // 1) recorded clip for this language, if assigned
     const clip = item.key ? this.clipFor(item.key) : null
@@ -1113,6 +1215,7 @@ export class CubeTutor extends BaseScriptComponent {
         return
       }
       this.ttsFetching = true
+      const gen = this.speechGen
       OpenAI.speech({
         model: "gpt-4o-mini-tts",
         input: item.line,
@@ -1121,6 +1224,7 @@ export class CubeTutor extends BaseScriptComponent {
       }).then((aud: AudioTrackAsset) => {
         this.ttsFetching = false
         this.ttsCache[cacheKey] = aud
+        if (gen !== this.speechGen) return // interrupted while fetching
         if (this.audio) {
           this.audio.audioTrack = aud
           this.audio.play(1)
@@ -1142,17 +1246,23 @@ export class CubeTutor extends BaseScriptComponent {
     if (this.lang !== "en") return
     try {
       const options = TextToSpeech.Options.create()
+      this.ttsFetching = true // async: hold the queue until the audio arrives
+      const gen = this.speechGen
       this.ttsModule.synthesize(line, options,
         (track: AudioTrackAsset) => {
+          this.ttsFetching = false
+          if (gen !== this.speechGen) return // interrupted while synthesizing
           if (this.audio) {
             this.audio.audioTrack = track
             this.audio.play(1)
           }
         },
         (error: number, description: string) => {
+          this.ttsFetching = false
           print("CubeTutor: TTS error " + error + " — " + description)
         })
     } catch (e) {
+      this.ttsFetching = false
       print("CubeTutor: TTS unavailable (" + e + "); text panel only")
     }
   }

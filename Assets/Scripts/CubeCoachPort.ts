@@ -104,6 +104,9 @@ export class CubeCoachPort extends BaseScriptComponent {
     body.shape = shape
 
     this.buildCube()
+    // No mirror hacks: the cube is built with STANDARD handedness (green at +z,
+    // red at +x). A real, right-handed rig is essential — a negative scale here
+    // reverses the handedness of every layer turn, which broke the moves.
 
     const interactable = this.sceneObject.createComponent(Interactable.getTypeName()) as any
     interactable.targetingMode = TargetingMode.All // pinch (direct/indirect) + index-finger poke
@@ -111,7 +114,7 @@ export class CubeCoachPort extends BaseScriptComponent {
     interactable.onInteractorTriggerEnd.add((ev: any) => this.onTriggerEnd(ev))
     interactable.onInteractorTriggerEndOutside.add((ev: any) => this.onTriggerEnd(ev))
 
-    print("CubeCoachPort: ready — index finger turns layers; pinch + drag rotates the cube")
+    print("CubeCoachPort: ready [BUILD mirror-v11] — index finger turns layers; pinch + drag rotates the cube")
   }
 
   // --- cube construction ----------------------------------------------------
@@ -170,8 +173,8 @@ export class CubeCoachPort extends BaseScriptComponent {
           )
           if (y === 1) this.addSticker(cubie, "U", new vec3(0, off, 0), new vec3(st, th, st))
           if (y === -1) this.addSticker(cubie, "D", new vec3(0, -off, 0), new vec3(st, th, st))
-          if (z === -1) this.addSticker(cubie, "F", new vec3(0, 0, -off), new vec3(st, st, th))
-          if (z === 1) this.addSticker(cubie, "B", new vec3(0, 0, off), new vec3(st, st, th))
+          if (z === 1) this.addSticker(cubie, "F", new vec3(0, 0, off), new vec3(st, st, th))   // green faces the user (+z)
+          if (z === -1) this.addSticker(cubie, "B", new vec3(0, 0, -off), new vec3(st, st, th)) // blue at the back (-z)
           if (x === 1) this.addSticker(cubie, "R", new vec3(off, 0, 0), new vec3(th, st, st))
           if (x === -1) this.addSticker(cubie, "L", new vec3(-off, 0, 0), new vec3(th, st, st))
           this.cubies.push(cubie)
@@ -244,6 +247,17 @@ export class CubeCoachPort extends BaseScriptComponent {
     this.updateOrbit()
     this.trackLayerSwipe()
     this.updateTeachingAids(dt)
+
+    // scan guidance: the whole cube turns by itself to SHOW which face to scan;
+    // grabbing the cube (orbit) takes priority and cancels the auto-turn
+    if (this.scanOrientTarget) {
+      if (this.orbiter) {
+        this.scanOrientTarget = null
+      } else {
+        const t = this.sceneObject.getTransform()
+        t.setLocalRotation(quat.slerp(t.getLocalRotation(), this.scanOrientTarget, Math.min(1, dt * 4)))
+      }
+    }
 
     if (this.flashTimer > 0) {
       this.flashTimer -= dt
@@ -345,8 +359,8 @@ export class CubeCoachPort extends BaseScriptComponent {
     switch (letter) {
       case "U": return vec3.up()
       case "D": return vec3.up().uniformScale(-1)
-      case "F": return vec3.forward().uniformScale(-1) // built at -z
-      case "B": return vec3.forward()
+      case "F": return vec3.forward()                  // green built at +z (faces user)
+      case "B": return vec3.forward().uniformScale(-1) // blue built at -z
       case "R": return vec3.right()
       default: return vec3.right().uniformScale(-1) // L
     }
@@ -981,6 +995,122 @@ export class CubeCoachPort extends BaseScriptComponent {
     return null
   }
 
+  private scanOrientTarget: quat | null = null
+
+  // Put every piece back where it belongs: a clean, solved cube (used before
+  // the scan demo so colors on the AR cube match the words).
+  resetToSolved() {
+    if (this.animating) this.finishRotation()
+    for (const c of this.cubies) {
+      const parts = c.name.split("_") // "Cubie_x_y_z" — the birth cell
+      const g = new vec3(parseInt(parts[1]), parseInt(parts[2]), parseInt(parts[3]))
+      const t = c.getTransform()
+      t.setLocalPosition(g.uniformScale(this.spacing))
+      t.setLocalRotation(quat.quatIdentity())
+    }
+    this.history = []
+    this.histIdx = 0
+    this.userMoves = 0
+    this.hideMoveArrow()
+    this.setHighlight("none")
+  }
+
+  // Smoothly turn the WHOLE cube so the face with `letter` looks at the user
+  // and the face with `upLetter` points up — a silent "hold it like THIS" demo.
+  orientForScan(letter: string, upLetter: string) {
+    let df: vec3 | null = null
+    let du: vec3 | null = null
+    for (const c of this.cubiesByStickerCount(1)) {
+      const s = this.stickersOf(c)[0]
+      if (s.letter === letter) df = s.dir
+      if (s.letter === upLetter) du = s.dir
+    }
+    if (!df || !du) return
+    // +z faces the user: updateFollow yaws the rig so the cube's local +z points
+    // back at the wearer, so turning the scanned face to +z shows its FRONT.
+    const zAxis = new vec3(0, 0, 1)
+    const yAxis = new vec3(0, 1, 0)
+    const q1 = quat.rotationFromTo(df, zAxis)
+    const v = q1.multiplyVec3(du)
+    const ang = Math.atan2(v.cross(yAxis).dot(zAxis), v.dot(yAxis))
+    this.scanOrientTarget = quat.angleAxis(ang, zAxis).multiply(q1)
+  }
+
+  clearScanOrient() {
+    this.scanOrientTarget = null
+  }
+
+  // After a scan, face the cube the way the user holds it: GREEN toward them,
+  // white up, RED on the right. Green is now built at +z (the user-facing side),
+  // so the reference pose is simply identity — no turn, no mirror.
+  orientForLearn() {
+    this.scanOrientTarget = quat.quatIdentity()
+  }
+
+  // ASolver-style scan look: the whole cube goes neutral grey while scanning,
+  // so the ONLY colors on it are the ones read from the user's REAL cube.
+  setScanDim(on: boolean) {
+    const letters = ["U", "D", "F", "B", "R", "L"]
+    for (const l of letters) {
+      if (!this.matCache[l]) continue
+      this.matCache[l].mainPass.baseColor = on
+        ? new vec4(0.30, 0.30, 0.34, 1)
+        : this.colorFor(l)
+    }
+  }
+
+  // A colored overlay tile on one face of one cubie: the scanner "paints" the
+  // colors it reads from the REAL cube onto the demo cube, cell by cell, LIVE.
+  // Upserts: calling again for the same cell just updates its color.
+  // Expects the cube in reset (solved) pose, so cubie-local == cube-local.
+  private scanTileMats: {[key: string]: Material} = {}
+  private scanTileObjs: SceneObject[] = []
+
+  setScanTile(pos: number[], dir: number[], color: vec4) {
+    const key = pos.join(",") + "|" + dir.join(",")
+    const existing = this.scanTileMats[key]
+    if (existing) {
+      existing.mainPass.baseColor = color
+      return
+    }
+    for (const c of this.cubies) {
+      const g = this.gridCoord(c)
+      if (g.x !== pos[0] || g.y !== pos[1] || g.z !== pos[2]) continue
+      const tile = global.scene.createSceneObject("ScanTile")
+      tile.setParent(c)
+      const off = 0.5 + 0.1 / this.cubieSize + 0.02 // just above the sticker
+      tile.getTransform().setLocalPosition(new vec3(dir[0] * off, dir[1] * off, dir[2] * off))
+      const th = 0.06 / this.cubieSize
+      const st = 0.68
+      tile.getTransform().setLocalScale(new vec3(
+        dir[0] !== 0 ? th : st, dir[1] !== 0 ? th : st, dir[2] !== 0 ? th : st))
+      const rmv = tile.createComponent("Component.RenderMeshVisual") as RenderMeshVisual
+      rmv.mesh = this.boxMesh
+      const m = this.baseMaterial.clone()
+      m.mainPass.baseColor = color
+      rmv.mainMaterial = m
+      this.scanTileMats[key] = m
+      this.scanTileObjs.push(tile)
+      return
+    }
+  }
+
+  // Remove the live tiles of ONE face (used when the reading was tentative).
+  clearScanTilesOfFace(dir: number[]) {
+    // tiles are keyed by "pos|dir": rebuilds are cheap, so just recolor to grey
+    for (const key in this.scanTileMats) {
+      if (key.split("|")[1] === dir.join(",")) {
+        this.scanTileMats[key].mainPass.baseColor = new vec4(0.30, 0.30, 0.34, 1)
+      }
+    }
+  }
+
+  clearScanTiles() {
+    for (const t of this.scanTileObjs) t.destroy()
+    this.scanTileObjs = []
+    this.scanTileMats = {}
+  }
+
   // --- real-cube scan: replace the whole cube state with a scanned one ---------
 
   // facelets: 54 entries of {pos, dir, letter} in grid coordinates (pos = the
@@ -1007,8 +1137,8 @@ export class CubeCoachPort extends BaseScriptComponent {
       if (x === -1) out.push({letter: "L", n: [-1, 0, 0]})
       if (y === 1) out.push({letter: "U", n: [0, 1, 0]})
       if (y === -1) out.push({letter: "D", n: [0, -1, 0]})
-      if (z === -1) out.push({letter: "F", n: [0, 0, -1]})
-      if (z === 1) out.push({letter: "B", n: [0, 0, 1]})
+      if (z === 1) out.push({letter: "F", n: [0, 0, 1]})
+      if (z === -1) out.push({letter: "B", n: [0, 0, -1]})
       return out
     }
     // match every scanned cell to the unique physical piece with those colors,
@@ -1032,21 +1162,23 @@ export class CubeCoachPort extends BaseScriptComponent {
       used[wanted] = true
       const cubie = this.cubieWithLetters(wanted)
       if (!cubie) return "badPieces"
-      const t1 = cell.filter((f) => f.letter === srcFaces[0].letter)[0]
-      const n1 = new vec3(srcFaces[0].n[0], srcFaces[0].n[1], srcFaces[0].n[2])
-      const d1 = new vec3(t1.dir[0], t1.dir[1], t1.dir[2])
-      let rot = quat.rotationFromTo(n1, d1)
-      if (srcFaces.length > 1) {
-        const t2 = cell.filter((f) => f.letter === srcFaces[1].letter)[0]
-        const n2 = new vec3(srcFaces[1].n[0], srcFaces[1].n[1], srcFaces[1].n[2])
-        const d2 = new vec3(t2.dir[0], t2.dir[1], t2.dir[2])
-        const v = rot.multiplyVec3(n2)
-        const ang = Math.atan2(v.cross(d2).dot(d1), v.dot(d2))
-        if (Math.abs(ang) > 0.01) rot = quat.angleAxis(ang, d1).multiply(rot)
+      let rot: quat | null
+      if (srcFaces.length >= 2) {
+        // corner/edge: build the rotation matrix straight from where each face
+        // axis lands (columns), then convert. The old quat.rotationFromTo path
+        // DEGENERATED when a face was antiparallel to its scanned side (a
+        // flipped edge), and rejected perfectly valid cubes as "badPieces".
+        rot = this.rotForCubie(srcFaces, cell)
+      } else {
+        // center: one sticker, aligns directly — no degeneracy possible
+        const t1 = cell.filter((f) => f.letter === srcFaces[0].letter)[0]
+        const n1 = new vec3(srcFaces[0].n[0], srcFaces[0].n[1], srcFaces[0].n[2])
+        const d1 = new vec3(t1.dir[0], t1.dir[1], t1.dir[2])
+        rot = quat.rotationFromTo(n1, d1)
       }
-      // every sticker must land EXACTLY on its scanned side (catches mirror
-      // impossibilities from misread colors — e.g. a corner scanned "twisted
-      // the wrong way")
+      if (!rot) return "badPieces"
+      // every sticker must land EXACTLY on its scanned side (catches genuine
+      // impossibilities — a corner scanned "twisted the wrong way")
       for (const f of srcFaces) {
         const target = cell.filter((g) => g.letter === f.letter)[0]
         const landed = rot.multiplyVec3(new vec3(f.n[0], f.n[1], f.n[2]))
@@ -1073,6 +1205,53 @@ export class CubeCoachPort extends BaseScriptComponent {
     this.hideMoveArrow()
     this.setHighlight("none")
     return null
+  }
+
+  // Rotation for a corner/edge cubie, built directly from where each of its
+  // solved face-axes lands (matrix columns) — robust to the antiparallel case
+  // that broke quat.rotationFromTo. Returns null if the columns are degenerate.
+  private rotForCubie(
+    srcFaces: {letter: string, n: number[]}[],
+    cell: {pos: number[], dir: number[], letter: string}[]
+  ): quat | null {
+    const cols: {[k: string]: vec3} = {}
+    for (const f of srcFaces) {
+      const t = cell.filter((g) => g.letter === f.letter)[0]
+      if (!t) return null
+      const d = new vec3(t.dir[0], t.dir[1], t.dir[2])
+      // f.n is a signed unit axis; column for +axis is d, for -axis is -d
+      if (Math.abs(f.n[0]) === 1) cols["x"] = f.n[0] > 0 ? d : d.uniformScale(-1)
+      else if (Math.abs(f.n[1]) === 1) cols["y"] = f.n[1] > 0 ? d : d.uniformScale(-1)
+      else if (Math.abs(f.n[2]) === 1) cols["z"] = f.n[2] > 0 ? d : d.uniformScale(-1)
+      else return null
+    }
+    // an edge leaves one axis free: fill it right-handed so R is a rotation
+    if (!cols["x"] && cols["y"] && cols["z"]) cols["x"] = cols["y"].cross(cols["z"])
+    else if (!cols["y"] && cols["x"] && cols["z"]) cols["y"] = cols["z"].cross(cols["x"])
+    else if (!cols["z"] && cols["x"] && cols["y"]) cols["z"] = cols["x"].cross(cols["y"])
+    if (!cols["x"] || !cols["y"] || !cols["z"]) return null
+    const m = new mat3()
+    m.column0 = cols["x"]; m.column1 = cols["y"]; m.column2 = cols["z"]
+    // matrix->quat; hedge the column/row convention by verifying, else transpose
+    let q = quat.fromRotationMat(m)
+    if (this.landsOK(q, srcFaces, cell)) return q
+    q = quat.fromRotationMat(m.transpose())
+    if (this.landsOK(q, srcFaces, cell)) return q
+    return null
+  }
+
+  private landsOK(
+    q: quat,
+    srcFaces: {letter: string, n: number[]}[],
+    cell: {pos: number[], dir: number[], letter: string}[]
+  ): boolean {
+    for (const f of srcFaces) {
+      const target = cell.filter((g) => g.letter === f.letter)[0]
+      const landed = q.multiplyVec3(new vec3(f.n[0], f.n[1], f.n[2]))
+      if (Math.abs(landed.x - target.dir[0]) + Math.abs(landed.y - target.dir[1]) +
+          Math.abs(landed.z - target.dir[2]) > 0.1) return false
+    }
+    return true
   }
 
   // The (unique) cubie whose sticker letters, sorted and joined, equal `sorted`.

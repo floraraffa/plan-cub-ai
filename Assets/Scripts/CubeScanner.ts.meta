@@ -1,0 +1,98 @@
+- !<AssetImportMetadata/a6102929-eca6-4a5c-90a1-9e13bd0d5458>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 89222246-48bc-4ff8-bcc6-31d684305f50
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 89222246-48bc-4ff8-bcc6-31d684305f50
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> bc329a1e-86a2-48da-bd6d-7521c6bd4f2a
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/bc329a1e-86a2-48da-bd6d-7521c6bd4f2a>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 7f659204-9f6f-4ce4-92f7-5f784cab1186
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    btnCancelEnglish: false
+    btnCancelFrench: false
+    btnCancelSpanish: false
+    btnCaptureEnglish: false
+    btnCaptureFrench: false
+    btnCaptureSpanish: false
+    btnConfirmEnglish: false
+    btnConfirmFrench: false
+    btnConfirmSpanish: false
+    btnScanEnglish: false
+    btnScanFrench: false
+    btnScanSpanish: false
+    cubeObject: false
+    handleMesh: false
+    handleTexture: false
+    labelFont: false
+    previewSize: false
+    scanButtonSize: false
+    tutorObject: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - cubeObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      tutorObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      btnScanEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnScanSpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnScanFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnCaptureEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnCaptureSpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnCaptureFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnConfirmEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnConfirmSpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnConfirmFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnCancelEnglish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnCancelSpanish: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      btnCancelFrench: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      scanButtonSize: !<float> 14.000000
+      previewSize: !<float> 18.000000
+      labelFont: !<reference.Font> 00000000-0000-0000-0000-000000000000
+      handleTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      handleMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject cubeObject
+    - // @input SceneObject tutorObject
+    - // @input Asset.Texture btnScanEnglish
+    - // @input Asset.Texture btnScanSpanish
+    - // @input Asset.Texture btnScanFrench
+    - // @input Asset.Texture btnCaptureEnglish
+    - // @input Asset.Texture btnCaptureSpanish
+    - // @input Asset.Texture btnCaptureFrench
+    - // @input Asset.Texture btnConfirmEnglish
+    - // @input Asset.Texture btnConfirmSpanish
+    - // @input Asset.Texture btnConfirmFrench
+    - // @input Asset.Texture btnCancelEnglish
+    - // @input Asset.Texture btnCancelSpanish
+    - // @input Asset.Texture btnCancelFrench
+    - // @input float scanButtonSize = 14
+    - // @input float previewSize = 18
+    - // @input Asset.Font labelFont
+    - // @input Asset.Texture handleTexture
+    - // @input Asset.RenderMesh handleMesh
