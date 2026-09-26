@@ -73,21 +73,6 @@ hand.
   per-language artwork (EN/ES/FR) like Scan, and the scan window's text and
   voice stay in step with the cube's guided turns.
 
-### APIs used by the scanner
-
-| API | Used for | Notes |
-|-----|----------|-------|
-| **Spectacles Camera** (`CameraModule` → `requestCamera`, `Default_Color`, `onNewFrame`) | grabbing each face | camera frames come from the device, not the editor preview |
-| **Remote Service Gateway** → `OpenAI.chatCompletions` (`image_url`, **gpt-4o**) | reading the 9 sticker colors of each face by vision | needs an RSG token |
-| **Remote Service Gateway** → `OpenAI.speech` | the coach's trilingual voice (TTS) | needs an RSG token |
-| `Base64.encodeTextureAsync` · `ProceduralTextureProvider` · `InternetModule` | frame → JPEG, center-crop/sample, network | standard Spectacles APIs |
-
-This is the **same camera + Remote Service Gateway stack** used by our
-[Lingo Specs](https://github.com/floraraffa/specslingo-spectacles-2024) lens —
-`CameraModule` for the frames and RSG (OpenAI vision + TTS) for the AI. Nothing
-experimental; it just needs an RSG token and the camera enabled, and the camera
-part runs on the glasses rather than the editor preview.
-
 ## Requirements
 
 - **Lens Studio 5.15.x** (the Spectacles release line for 2024 hardware —
